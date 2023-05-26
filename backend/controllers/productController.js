@@ -27,13 +27,15 @@ const deleteProduct = catchAsyncErrors(async (req, res, next) => {
 
 // Get all products
 const getAllProducts = catchAsyncErrors(async (req, res) => {
-  const apiFeature = new ApiFeature(Product.find(), req.query).search();
+  const apiFeature = new ApiFeature(Product.find(), req.query)
+    .search()
+    .filter();
   const products = await apiFeature.query;
   const totalProducts = await Product.countDocuments();
 
   handleSuccess(res, 200, "All Products fetched successfully", {
-    total_products: totalProducts,
-    products: products,
+    totalProducts,
+    products,
   });
 });
 
