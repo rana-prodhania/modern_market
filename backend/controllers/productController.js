@@ -27,9 +27,11 @@ const deleteProduct = catchAsyncErrors(async (req, res, next) => {
 
 // Get all products
 const getAllProducts = catchAsyncErrors(async (req, res) => {
+  const resultPerPage = 5;
   const apiFeature = new ApiFeature(Product.find(), req.query)
     .search()
-    .filter();
+    .filter()
+    .pagination(resultPerPage);
   const products = await apiFeature.query;
   const totalProducts = await Product.countDocuments();
 

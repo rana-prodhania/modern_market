@@ -13,6 +13,7 @@ class ApiFeature {
     return this;
   }
 
+  // Method for filtering based on category and price
   filter() {
     const { keyword, page, limit, price, ...filterParams } = this.queryStr;
     this.query = this.query.find(filterParams);
@@ -27,6 +28,14 @@ class ApiFeature {
       }
     }
 
+    return this;
+  }
+
+  // Method for result per page
+  pagination(resultPerPage) {
+    const currentPage = Number(this.queryStr.page) || 1;
+    const skip = resultPerPage * (currentPage - 1);
+    this.query = this.query.skip(skip).limit(resultPerPage);
     return this;
   }
 }
