@@ -1,28 +1,30 @@
 import catchAsyncErrors from "../middleware/catchAsyncErrors.js";
 import Product from "../models/productModel.js";
 import ApiFeature from "../utils/apiFeature.js";
-import { handleSuccess, responseHandler } from "../utils/responseHandler.js";
+import { successHandler, notFoundHandler } from "../utils/responseHandler.js";
 
 // Create a new product -- admin only
-const createProduct = catchAsyncErrors(async (req, res, next) => {
+const createProduct = catchAsyncErrors(async (req, res) => {
   const product = await Product.create(req.body);
-  handleSuccess(res, 201, "Product created successfully", product);
+  successHandler(res, 201, "Product created successfully", product);
 });
 
 // Update a product -- admin only
-const updateProduct = catchAsyncErrors(async (req, res, next) => {
+const updateProduct = catchAsyncErrors(async (req, res) => {
   const product = await Product.findByIdAndUpdate(req.params.id, req.body, {
     new: true,
     runValidators: true,
     useFindAndModify: false,
   });
-  responseHandler(res, 200, "Product updated successfully", product, next);
+  notFoundHandler(product);
+  successHandler(res, 200, "Product updated successfully", product);
 });
 
 // Delete a product -- admin only
-const deleteProduct = catchAsyncErrors(async (req, res, next) => {
+const deleteProduct = catchAsyncErrors(async (req, res) => {
   const product = await Product.findByIdAndDelete(req.params.id);
-  responseHandler(res, 200, "Product deleted successfully", product, next);
+  notFoundHandler(product);
+  successHandler(res, 200, "Product deleted successfully", product);
 });
 
 // Get all products
@@ -35,22 +37,17 @@ const getAllProducts = catchAsyncErrors(async (req, res) => {
   const products = await apiFeature.query;
   const totalProducts = await Product.countDocuments();
 
-  handleSuccess(res, 200, "All Products fetched successfully", {
+  successHandler(res, 200, "All Products fetched successfully", {
     totalProducts,
     products,
   });
 });
 
 // Get a single product
-const getSingleProduct = catchAsyncErrors(async (req, res, next) => {
+const getSingleProduct = catchAsyncErrors(async (req, res) => {
   const product = await Product.findById(req.params.id);
-  responseHandler(
-    res,
-    200,
-    "Single Product fetched successfully",
-    product,
-    next
-  );
+  notFoundHandler(product);
+  successHandler(res, 200, "Single Product fetched successfully", product);
 });
 
 export {

@@ -1,19 +1,13 @@
 import createError from "http-errors";
 // Helper function to handle not found and success responses
-const responseHandler = (res, statusCode, message, data = {}, next) => {
+const notFoundHandler = (data = {}) => {
   if (!data) {
-    next(createError(404, "Product not found"));
-  } else {
-    res.status(statusCode).json({
-      success: true,
-      message,
-      data,
-    });
+    throw createError(404, "Product not found");
   }
 };
 
 // Helper function to handle success responses
-const handleSuccess = (res, statusCode, message, data = {}) => {
+const successHandler = (res, statusCode, message, data = {}) => {
   res.status(statusCode).json({
     success: true,
     message,
@@ -21,4 +15,4 @@ const handleSuccess = (res, statusCode, message, data = {}) => {
   });
 };
 
-export { responseHandler, handleSuccess };
+export { successHandler, notFoundHandler };
