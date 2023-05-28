@@ -3,16 +3,27 @@ import morgan from "morgan";
 
 // import routes
 import errorMiddleware from "./middleware/errorMiddleware.js";
+
+// import routes
 import product from "./routes/productRoute.js";
+import user from "./routes/userRoute.js";
 
 const app = express();
 
 // Middleware
 app.use(morgan("dev"));
 app.use(json());
+
+// Routes
+app.use("/api/v1/", user);
 app.use("/api/v1/", product);
 
-// Middleware for error messages
+// client error handler
+app.use((req, res, next) => {
+  res.status(404).json({ message: "route is not found" });
+  next();
+});
+// server error handler
 app.use(errorMiddleware);
 
 export default app;
