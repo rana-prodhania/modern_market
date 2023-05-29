@@ -5,6 +5,7 @@ import { successHandler, notFoundHandler } from "../utils/responseHandler.js";
 
 // Create a new product -- admin only
 const createProduct = catchAsyncErrors(async (req, res) => {
+  req.body.user = req.user.id;
   const product = await Product.create(req.body);
   successHandler(res, 201, "Product created successfully", product);
 });
