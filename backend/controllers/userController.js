@@ -2,7 +2,7 @@ import createError from "http-errors";
 import catchAsyncErrors from "../middleware/catchAsyncErrors.js";
 import User from "../models/userModel.js";
 import sendJWTToken from "../utils/jwtToken.js";
-import { successHandler } from "../utils/responseHandler.js";
+import { successHandler, notFoundHandler } from "../utils/responseHandler.js";
 
 // Register a new user
 const registerUser = catchAsyncErrors(async (req, res) => {
@@ -35,11 +35,85 @@ const loginUser = catchAsyncErrors(async (req, res, next) => {
 
 // logout user
 const logoutUser = catchAsyncErrors(async (req, res) => {
-  res.cookie("token", null, {
-    expires: new Date(Date.now()),
+  res.clearCookie("token", {
     httpOnly: true,
   });
   successHandler(res, 200, "Logout successful");
 });
 
-export { registerUser, loginUser, logoutUser };
+// Get user details
+const getUserDetails = catchAsyncErrors(async (req, res, next) => {
+  const user = await User.findById(req.user.id);
+  successHandler(res, 200, "User details", user);
+});
+
+// Update user details
+const updateUserDetails = catchAsyncErrors(async (req, res, next) => {
+  const { name, email } = req.body;
+  const newUserData = { name, email };
+  const user = await User.findByIdAndUpdate(req.user.id, newUserData, {
+    new: true,
+    runValidators: true,
+    useFindAndModify: false,
+  });
+  successHandler(res, 200, "User details updated", user);
+});
+
+// Update user password
+const updateUserPassword = catchAsyncErrors(async (req, res, next) => {
+  const { oldPassword, newPassword } = req.body;
+  const user = await User.findById(req.user.id).select("+password");
+  const isPasswordMatch = await user.matchPassword(oldPassword);
+  if (!isPasswordMatch) {
+    return next(createError(400, "Old password is incorrect"));
+  }
+  user.password = newPassword;
+  await user.save();
+  sendJWTToken(res, 200, "Password updated", user);
+});
+
+// Get all users - admin only
+const getAllUsers = catchAsyncErrors(async (req, res, next) => {
+  const users = await User.find();
+  successHandler(res, 200, "Users", users);
+});
+
+// Get a Single user - admin only
+const getSingleUser = catchAsyncErrors(async (req, res, next) => {
+  const user = await User.findById(req.params.id);
+  notFoundHandler(user, "User not found");
+  successHandler(res, 200, "User", user);
+});
+
+// Update user role - admin only
+const updateUserRole = catchAsyncErrors(async (req, res, next) => {
+  const { name, email, role } = req.body;
+  const newUserData = { name, email, role };
+  const user = await User.findByIdAndUpdate(req.params.id, newUserData, {
+    new: true,
+    runValidators: true,
+    useFindAndModify: false,
+  });
+  notFoundHandler(user, "User not found");
+  successHandler(res, 200, "User role updated", user);
+});
+
+// Delete user - admin only
+const deleteUser = catchAsyncErrors(async (req, res, next) => {
+  const user = await User.findByIdAndDelete(req.params.id);
+  notFoundHandler(user, "User not found");
+  successHandler(res, 200, "User deleted", user);
+});
+
+export {
+  registerUser,
+  loginUser,
+  logoutUser,
+  getUserDetails,
+  updateUserDetails,
+  updateUserPassword,
+  getAllUsers,
+  getSingleUser,
+  updateUserRole,
+  deleteUser,
+};

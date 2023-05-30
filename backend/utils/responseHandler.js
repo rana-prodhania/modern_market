@@ -1,8 +1,8 @@
 import createError from "http-errors";
 // Helper function to handle not found and success responses
-const notFoundHandler = (data = {}) => {
+const notFoundHandler = (data = {}, message) => {
   if (!data) {
-    throw createError(404, "Product not found");
+    throw createError(404, message);
   }
 };
 

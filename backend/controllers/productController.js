@@ -17,14 +17,14 @@ const updateProduct = catchAsyncErrors(async (req, res) => {
     runValidators: true,
     useFindAndModify: false,
   });
-  notFoundHandler(product);
+  notFoundHandler(product, "Product not found");
   successHandler(res, 200, "Product updated successfully", product);
 });
 
 // Delete a product -- admin only
 const deleteProduct = catchAsyncErrors(async (req, res) => {
   const product = await Product.findByIdAndDelete(req.params.id);
-  notFoundHandler(product);
+  notFoundHandler(product, "Product not found");
   successHandler(res, 200, "Product deleted successfully", product);
 });
 
@@ -47,7 +47,7 @@ const getAllProducts = catchAsyncErrors(async (req, res) => {
 // Get a single product
 const getSingleProduct = catchAsyncErrors(async (req, res) => {
   const product = await Product.findById(req.params.id);
-  notFoundHandler(product);
+  notFoundHandler(product, "Product not found");
   successHandler(res, 200, "Single Product fetched successfully", product);
 });
 
