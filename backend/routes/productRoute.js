@@ -2,6 +2,7 @@ import express from "express";
 import { authorizeRoles, authenticateUser } from "../controllers/auth.js";
 import {
   createProduct,
+  createProductReview,
   deleteProduct,
   getAllProducts,
   getSingleProduct,
@@ -19,5 +20,5 @@ router
   .get(getSingleProduct)
   .delete(authenticateUser, authorizeRoles("admin"), deleteProduct)
   .put(authenticateUser, authorizeRoles("admin"), updateProduct);
-
+router.route("/product/review/new").put(authenticateUser, createProductReview);
 export default router;

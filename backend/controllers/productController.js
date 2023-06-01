@@ -51,10 +51,54 @@ const getSingleProduct = catchAsyncErrors(async (req, res) => {
   successHandler(res, 200, "Single Product fetched successfully", product);
 });
 
+// Create new review or update review
+const createProductReview = catchAsyncErrors(async (req, res, next) => {
+  const { rating, comment, productId } = req.body;
+
+  const newReview = {
+    user: req.user._id,
+    name: req.user.name,
+    rating: Number(rating),
+    comment,
+  };
+
+  const product = await Product.findById(productId);
+
+  notFoundHandler(product, "Product not found");
+
+  const existingReview = product.reviews.find(
+    (review) => review.user.toString() === req.user._id.toString()
+  );
+
+  if (existingReview) {
+    // Update existing review
+    existingReview.rating = rating;
+    existingReview.comment = comment;
+  } else {
+    // Add new review
+    product.reviews.push(newReview);
+    product.numOfReviews = product.reviews.length;
+  }
+
+  const reviewCount = product.reviews.length;
+  const totalRatings = product.reviews.reduce(
+    (total, review) => total + review.rating,
+    0
+  );
+  product.ratings = totalRatings / reviewCount;
+
+  await product.save({ validateBeforeSave: false });
+
+  res.status(200).json({
+    success: true,
+  });
+});
+
 export {
   getAllProducts,
   getSingleProduct,
   createProduct,
   deleteProduct,
   updateProduct,
+  createProductReview,
 };
